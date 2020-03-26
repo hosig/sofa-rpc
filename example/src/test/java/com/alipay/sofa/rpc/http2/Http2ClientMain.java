@@ -49,13 +49,13 @@ public class Http2ClientMain {
             .setTimeout(1000);
         ProtoService helloService = consumerConfig.refer();
 
-        LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
+        LOGGER.info("started at pid {}", RpcRuntimeContext.PID);
 
         while (true) {
             try {
                 EchoRequest request = EchoRequest.newBuilder().setGroup(Group.A).setName("xxx").build();
                 EchoResponse s = helloService.echoObj(request);
-                LOGGER.warn("{}", s);
+                LOGGER.info("【P】{}", s);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }

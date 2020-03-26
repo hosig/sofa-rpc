@@ -48,7 +48,9 @@
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
         <!-- Build args -->
-        <module.install.skip>true</module.install.skip>
+        <!--<module.install.skip>true</module.install.skip>-->
+        <!-- 换成下面试了试，还是无法生成sofa-rpc-bom*.jar -s.kin -->
+        <module.install.skip>false</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
     </properties>
 

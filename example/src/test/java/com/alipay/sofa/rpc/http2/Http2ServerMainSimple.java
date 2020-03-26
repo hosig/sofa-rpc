@@ -22,22 +22,21 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.protobuf.ProtoService;
-import com.alipay.sofa.rpc.protobuf.ProtoServiceImpl;
 import com.alipay.sofa.rpc.server.http.Http2ClearTextServer;
+import com.alipay.sofa.rpc.test.HelloService;
+import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class Http2ServerMain {
+public class Http2ServerMainSimple {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(Http2ServerMain.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(Http2ServerMainSimple.class);
 
     public static void main(String[] args) {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
@@ -47,41 +46,39 @@ public class Http2ServerMain {
             .setPort(12300)
             .setDaemon(false);
 
-        ProviderConfig<ProtoService> providerConfig = new ProviderConfig<ProtoService>()
-            .setInterfaceId(ProtoService.class.getName())
-            .setApplication(application)
-            .setRef(new ProtoServiceImpl())
-            .setServer(serverConfig);
-
-        providerConfig.export();
-
-        // 就算不执行下面两句，Http2ClientMain也可正常调用，执行的是 ProtoServiceImpl.echoObj() 方法。--为啥执行的是echoObj()方法呢？
-/*
-        ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
-                    .setInterfaceId(HelloService.class.getName())
+        // 会否 ProtoService 仅仅是为了 统计件数，于是 将ProtoService相关的代码 如下屏蔽试了试，发现 helloService 会无法正常被使用。 --s.kin
+        // 后来猜测 ProtoService 是当 桥 用的，helloService实际是挂在该 protoService上面。
+        /*        ProviderConfig<ProtoService> providerConfig = new ProviderConfig<ProtoService>()
+                    .setInterfaceId(ProtoService.class.getName())
                     .setApplication(application)
-                    .setRef(new HelloServiceImpl())
-                    .setServer(serverConfig)
-                    .setRegister(false);
+                    .setRef(new ProtoServiceImpl())
+                    .setServer(serverConfig);
+
+                providerConfig.export();*/
+
+        ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setApplication(application)
+            .setRef(new HelloServiceImpl())
+            .setServer(serverConfig)
+            .setRegister(false);
         providerConfig2.export();
-*/
-        // 试了下，发现chrome中通过下面的url是无法 访问的 --s.kin
         // http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello
 
-        LOGGER.info("started at pid {}", RpcRuntimeContext.PID);
+        LOGGER.error("started at pid {}", RpcRuntimeContext.PID);
 
-        final AtomicInteger cnt = ((ProtoServiceImpl) providerConfig.getRef()).getCounter();
+        //        final AtomicInteger cnt = ((ProtoServiceImpl) providerConfig.getRef()).getCounter();
         final ThreadPoolExecutor executor = ((Http2ClearTextServer) serverConfig.getServer()).getBizThreadPool();
         Thread thread = new Thread(new Runnable() {
-            private long last = 0;
+            //            private long last = 0;
 
             @Override
             public void run() {
                 while (true) {
-                    long count = cnt.get();
-                    long tps = count - last;
-                    LOGGER.info("【B】last 1s invoke: {}, queue: {}", tps, executor.getQueue().size());
-                    last = count;
+                    //                    long count = cnt.get();
+                    //                    long tps = count - last;
+                    //                    LOGGER.error("last 1s invoke: {}, queue: {}", tps, executor.getQueue().size());
+                    //                    last = count;
 
                     try {
                         Thread.sleep(1000);
