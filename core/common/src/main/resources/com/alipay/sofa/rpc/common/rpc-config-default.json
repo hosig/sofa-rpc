@@ -168,7 +168,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认单分组
   "consumer.addressHolder": "singleGroup",
   // 负载均衡
-  "consumer.loadBalancer": "random",
+  "consumer.loadBalancer": "auto",
   //默认失败重试次数
   "consumer.retries": 0,
   //接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
@@ -186,7 +186,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认长连接数
   "consumer.connection.num": 1,
   // 默认consumer连provider超时时间
-  "consumer.connect.timeout": 5000,
+  "consumer.connect.timeout": 1000,
   // 默认consumer断开时等待结果的超时时间
   "consumer.disconnect.timeout": 10000,
   // 默认consumer调用provider超时时间
@@ -207,6 +207,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "consumer.connect.elastic.percent": 0,
   // 弹性连接的连接数
   "consumer.connect.elastic.size": 5,
+  // 是否允许通过RpcInvokeContext.getTargetUrl创建tcp连接，默认允许
+  "consumer.connect.create.when.absent": true,
   /*-------------Consumer相关配置结束-------------*/
 
 
@@ -296,5 +298,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   //是否所有客户端共享一个重连线程
   "consumer.share.reconnect.thread": false,
   //是否禁止开启lookout采集信息
-  "lookout.collect.disable": false
+  "lookout.collect.disable": false,
+  //是否禁止开启lookout采集信息
+  "connection.validate.sleep": false
 }
