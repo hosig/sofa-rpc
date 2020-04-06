@@ -17,6 +17,7 @@
 
 # CHANGE USER_DIR to your project address
 #export USER_DIR="~/workspace/github.com/sofastack/sofa-rpc"
+#export USER_DIR="/Users/zhanggeng/workspace/github.com/ujjboy/sofa-rpc-stable"
 export USER_DIR="/Users/zhanggeng/workspace/github.com/ujjboy/sofa-rpc-stable"
 export PROTO_PATH="${USER_DIR}/example/src/test/java/com/alipay/sofa/rpc/protobuf"
 export OUTPUT_PATH="${USER_DIR}/example/src/test/java"

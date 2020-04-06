@@ -22,6 +22,8 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.protobuf.ProtoService;
+import com.alipay.sofa.rpc.protobuf.ProtoServiceImpl;
 import com.alipay.sofa.rpc.server.http.Http2ClearTextServer;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
@@ -46,25 +48,28 @@ public class Http2ServerMainSimple {
             .setPort(12300)
             .setDaemon(false);
 
-        // 会否 ProtoService 仅仅是为了 统计件数，于是 将ProtoService相关的代码 如下屏蔽试了试，发现 helloService 会无法正常被使用。 --s.kin
-        // 后来猜测 ProtoService 是当 桥 用的，helloService实际是挂在该 protoService上面。
-        /*        ProviderConfig<ProtoService> providerConfig = new ProviderConfig<ProtoService>()
-                    .setInterfaceId(ProtoService.class.getName())
-                    .setApplication(application)
-                    .setRef(new ProtoServiceImpl())
-                    .setServer(serverConfig);
+        // 会否 ProtoService 仅仅是为了 统计件数，于是 将ProtoService相关的代码 如下屏蔽试了试，发现Http2ClientMain执行时，Server端并不会去调 helloService，而是去调ProtoService，所以屏蔽下2句后会出错。 --s.kin
+        // 后来猜测 ProtoService 是当 桥 用的，helloService实际是挂在该 protoService上面。但，就算不屏蔽下2句， helloService 也没有被执行的痕迹，仅仅是ProtoServiceImp被执行了。
+        // Q: 那sample中为啥要包括HelloService的providerConfig2呢？
+        // A: 原来是 通过  chrome中访问：http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello?name=Bob&age=2  可以发现HelloServiceImp 确实被执行了
+        ProviderConfig<ProtoService> providerConfig = new ProviderConfig<ProtoService>()
+            .setInterfaceId(ProtoService.class.getName())
+            .setApplication(application)
+            .setRef(new ProtoServiceImpl())
+            .setServer(serverConfig);
 
-                providerConfig.export();*/
+        providerConfig.export();
 
         ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setApplication(application)
             .setRef(new HelloServiceImpl())
             .setServer(serverConfig)
-            .setRegister(false);
+            .setRegister(false); /* setRegister false 是啥意思？ */
         providerConfig2.export();
         // http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello
-
+        // 但在chrome中访问上url，说是 “Failed to parse http2 request for uri /com.alipay.sofa.rpc.test.HelloService/sayHello form 127.0.0.1:58284 -> 127.0.0.1:12300, cause by: The number of parameter is wrong.”
+        // ==> 原来得访问“http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello?name=Bob&age=2”才行(前提：不能屏蔽providerConfig2的代码)
         LOGGER.error("started at pid {}", RpcRuntimeContext.PID);
 
         //        final AtomicInteger cnt = ((ProtoServiceImpl) providerConfig.getRef()).getCounter();

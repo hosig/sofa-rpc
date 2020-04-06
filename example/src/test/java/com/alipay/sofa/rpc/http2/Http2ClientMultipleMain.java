@@ -58,7 +58,7 @@ public class Http2ClientMultipleMain {
             .setTimeout(3000);
         final ProtoService protoService = consumerConfig.refer();
 
-        LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
+        LOGGER.info("started at pid {}", RpcRuntimeContext.PID);
 
         final int threads = 50;
         final AtomicLong cnt = new AtomicLong(0);
