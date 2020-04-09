@@ -14,17 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.http2;
+package com.alipay.sofa.rpc.http2.sk;
 
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.protobuf.EchoRequest;
-import com.alipay.sofa.rpc.protobuf.EchoResponse;
-import com.alipay.sofa.rpc.protobuf.Group;
-import com.alipay.sofa.rpc.protobuf.ProtoService;
 import com.alipay.sofa.rpc.test.HelloService;
 
 /**

@@ -25,6 +25,8 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.protobuf.ProtoService;
 import com.alipay.sofa.rpc.protobuf.ProtoServiceImpl;
 import com.alipay.sofa.rpc.server.http.Http2ClearTextServer;
+import com.alipay.sofa.rpc.test.HelloService;
+import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * 【C端】 Http2ClientMain 【S端】  Http2ServerMain
  */
 public class Http2ServerMain {
     /**
@@ -55,19 +58,15 @@ public class Http2ServerMain {
 
         providerConfig.export();
 
-        // 就算不执行下面两句，Http2ClientMain也可正常调用，执行的是 ProtoServiceImpl.echoObj() 方法。--为啥执行的是echoObj()方法呢？
-        /*
-                ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
-                            .setInterfaceId(HelloService.class.getName())
-                            .setApplication(application)
-                            .setRef(new HelloServiceImpl())
-                            .setServer(serverConfig)
-                            .setRegister(false);
-                providerConfig2.export();
-        */
-        // 试了下，发现chrome中通过下面的url是无法 访问的 --s.kin
+        ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setApplication(application)
+            .setRef(new HelloServiceImpl())
+            .setServer(serverConfig)
+            .setRegister(false);
+        providerConfig2.export();
         // http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello
-        // ==> 原来得访问“http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello?name=Bob&age=2”才行(前提：不能屏蔽providerConfig2的代码)
+        // ==> 原来chrome中得访问“http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello?name=Bob&age=2”才行
 
         LOGGER.info("started at pid {}", RpcRuntimeContext.PID);
 

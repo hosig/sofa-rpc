@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.protobuf.ProtoService;
 /**
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * 【C端】 Http2ClientMain 【S端】  Http2ServerMain
  */
 public class Http2ClientMain {
     /**
