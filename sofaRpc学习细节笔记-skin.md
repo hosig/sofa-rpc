@@ -12,9 +12,11 @@ K:\OneDrive-Seik2013\kb\phpAndHtml\java-sofarpc-QA.docx
 
 ## QA集
 
+### sofa基本
+
 #### Q: 最基本的compile
 
-A：compile过程如下：
+##### A：compile过程如下：
 
 1. intellij中专门做了一个K:\g\Hg\java\sofa\sofa-rpc 的module，里面的pom是最根部的pom。每次拿到新代码，先执行此pom的*install* lifecycle。
 
@@ -49,9 +51,11 @@ A: [sof](https://stackoverflow.com/questions/45598007/properties-in-parent-defin
 
 ##### 结论：maven版本低。但高版本的maven和低版本的intellij不兼容。当前的idea2017.3 可以使用 maven3.5.2来改善此问题。
 
-#### Q: sofa的例子(test\java\com\alipay\sofa\rpc\http2\Http2ServerMain.java)中，没看到HelloService和ProtoService对应的provider做了bind。内部是如何做到的呢？
+### 关于Http2的例子（test\java\com\alipay\sofa\rpc\http2\Http2ServerMain.java）
 
-A:  关联了同一个application （Line17，Line25）, 关联了同一个serverConfig（Line19，Line27），
+#### Q: Http2ServerMain.java中，没看到HelloService和ProtoService对应的provider做了bind。内部是如何做到的呢？
+
+##### A:  关联了同一个application （Line17，Line25）, 关联了同一个serverConfig（Line19，Line27），
 
 ```java
 public class Http2ServerMain {
@@ -87,4 +91,59 @@ public class Http2ServerMain {
         
 
 ```
+
+#### Q: 可不可以只关联HelloService，而不关联ProtoService呢？ 
+
+##### A： 不能。但可以仅关联ProtoService，而不关联HelloService。
+
+#### Q：Line28的ProviderConfig的 .setRegister(false) 是啥作用呢?
+
+##### A：
+
+#### Q:为何http2不能被实现（不管用chrome还是firefox访问url，server端出现下行Warning）?
+
+```perl
+# 访问下url，尽管可以得到正确resp的Text，但Server端提示并没有使用http2，而是降级成了http1.1. 
+#     chrome的插件“HTTP/2 and SPDY indicator” 也提示没有使用http2
+# url： http://127.0.0.1:12300/com.alipay.sofa.rpc.test.HelloService/sayHello?name=Bob&age=2
+2020-04-08 10:49:39,386 SOFA-SEV-H2C-BIZ-12300-4-T1  WARN [com.alipay.sofa.rpc.transport.http.Http2ServerChannelInitializer:warn:142] - Directly talking: HTTP/1.1 (no upgrade was attempted) from 127.0.0.1:50226
+```
+
+##### A: 尽管http2是可以通过非tls方式调用的，但 普通的browser（chrome/ff之类）仅支持https下使用http2. 
+
+##### 既然一般不需使用 非tls方式的http2，就不去深究了。--> 反正 可以通过 \sofa\rpc\http2\Http2ClientMain.java 如下访问
+
+```java
+    public static void main(String[] args) {
+        ApplicationConfig application = new ApplicationConfig().setAppName("test-client");
+
+        ConsumerConfig<ProtoService> consumerConfig = new ConsumerConfig<ProtoService>()
+            .setApplication(application)
+            .setInterfaceId(ProtoService.class.getName())
+            .setProtocol("h2c")
+            .setDirectUrl("h2c://127.0.0.1:12300")
+            .setSerialization("protobuf")
+            .setRegister(false)
+            .setTimeout(1000);
+        ProtoService helloService = consumerConfig.refer();
+
+        LOGGER.info("started at pid {}", RpcRuntimeContext.PID);
+
+        while (true) {
+            try {
+                EchoRequest request = EchoRequest.newBuilder().setGroup(Group.A).setName("xxx").build();
+                EchoResponse s = helloService.echoObj(request);
+                LOGGER.info("【P】{}", s);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {
+            }
+        }
+    }
+```
+
+###### Q：那如何做 tls版的http2的Server端？
 
